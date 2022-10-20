@@ -1,6 +1,7 @@
 # Benchmarks for Minio and Reduct Storage with Python client
 
-I write and read 1 Gb of random data from [Minio](https://min.io) and [Reduct Storage](https://reduct-storage.dev).
+The benchmarks write and read 1 Gb of random data from [Minio](https://min.io)
+and [Reduct Storage](https://reduct-storage.dev).
 
 ## Results
 
