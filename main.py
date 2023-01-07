@@ -66,11 +66,11 @@ if __name__ == "__main__":
     size = read_from_minio(ts, time.time())
     print(f"Read {size / 1000_000} Mb from Minio: {time.time() - ts_read} s")
 
-    loop = asyncio.new_event_loop();
+    loop = asyncio.new_event_loop()
     ts = time.time()
     size = loop.run_until_complete(write_to_reduct())
-    print(f"Write {size / 1000_000} Mb to Reduct Storage: {time.time() - ts} s")
+    print(f"Write {size / 1000_000} Mb to ReductStore: {time.time() - ts} s")
 
     ts_read = time.time()
     size = loop.run_until_complete(read_from_reduct(ts, time.time()))
-    print(f"Read {size / 1000_000} Mb from Reduct Storage: {time.time() - ts_read} s")
+    print(f"Read {size / 1000_000} Mb from ReductStore: {time.time() - ts_read} s")

@@ -1,6 +1,6 @@
 services:
   reduct-storage:
-    image: reductstorage/engine:v1.0.1
+    image: reductstore/reductstore:latest
     volumes:
       - ./reduct-data:/data
     ports:
