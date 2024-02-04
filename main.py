@@ -6,22 +6,30 @@ import asyncio
 from minio import Minio
 from reduct import Client as ReductClient
 
-CHUNK_SIZE = 100000
-CHUNK_COUNT = 10000
+BLOB_SIZE = 10_000_000
+BLOB_COUNT = 1_000_000_000 // BLOB_SIZE
 BUCKET_NAME = "test"
 
-CHUNK = random.randbytes(CHUNK_SIZE)
+CHUNK = random.randbytes(BLOB_SIZE)
 
-minio_client = Minio("127.0.0.1:9000", access_key="minioadmin", secret_key="minioadmin", secure=False)
-reduct_client = ReductClient("http://127.0.0.1:8383")
+minio_client = Minio(
+    "127.0.0.1:9000", access_key="minioadmin", secret_key="minioadmin", secure=False
+)
+
+
+# reduct_client = ReductClient("http://127.0.0.1:8383")
 
 
 def write_to_minio():
     count = 0
-    for i in range(CHUNK_COUNT):
-        count += CHUNK_SIZE
-        minio_client.put_object(BUCKET_NAME, f"data/{str(int(time.time_ns() / 1000))}.bin", io.BytesIO(CHUNK),
-                                CHUNK_SIZE)
+    for i in range(BLOB_COUNT):
+        count += BLOB_SIZE
+        minio_client.put_object(
+            BUCKET_NAME,
+            f"data/{str(int(time.time_ns() / 1000))}.bin",
+            io.BytesIO(CHUNK),
+            BLOB_SIZE,
+        )
     return count
 
 
@@ -40,24 +48,26 @@ def read_from_minio(t1, t2):
 
 
 async def write_to_reduct():
-    count = 0
-    bucket = await reduct_client.create_bucket("test", exist_ok=True)
-    for i in range(CHUNK_COUNT):
-        await bucket.write("data", CHUNK)
-        count += CHUNK_SIZE
-    return count
+    async with ReductClient("http://127.0.0.1:8383") as reduct_client:
+        count = 0
+        bucket = await reduct_client.create_bucket("test", exist_ok=True)
+        for i in range(1, BLOB_COUNT):
+            await bucket.write("data", CHUNK)
+            count += BLOB_SIZE
+        return count
 
 
 async def read_from_reduct(t1, t2):
-    count = 0
-    bucket = await reduct_client.get_bucket("test")
-    async for rec in bucket.query("data", int(t1 * 1000000), int(t2 * 1000000)):
-        count += len(await rec.read_all())
-    return count
+    async with ReductClient("http://127.0.0.1:8383") as reduct_client:
+        count = 0
+        bucket = await reduct_client.get_bucket("test")
+        async for rec in bucket.query("data", int(t1 * 1000000), int(t2 * 1000000)):
+            count += len(await rec.read_all())
+        return count
 
 
 if __name__ == "__main__":
-    print(f"Chunk size={CHUNK_SIZE/1000_000} Mb, count={CHUNK_COUNT}")
+    print(f"Chunk size={BLOB_SIZE / 1000_000} Mb, count={BLOB_COUNT}")
     ts = time.time()
     size = write_to_minio()
     print(f"Write {size / 1000_000} Mb to Minio: {time.time() - ts} s")

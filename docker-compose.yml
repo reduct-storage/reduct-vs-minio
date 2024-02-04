@@ -1,6 +1,6 @@
 services:
-  reduct-storage:
-    image: reductstore/reductstore:latest
+  reductstore:
+    image: reduct/store:latest
     volumes:
       - ./reduct-data:/data
     ports:

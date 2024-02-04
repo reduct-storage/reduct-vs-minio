@@ -1,2 +1,2 @@
-minio~=7.0
-reduct-py~=1.2
+minio
+reduct-py

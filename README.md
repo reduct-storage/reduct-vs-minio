@@ -7,9 +7,9 @@ and [ReductStore](https://www.reduct.store).
 
 | Chunk                  | Operation | Minio   | ReductStore |
 |------------------------|-----------|---------|-------------|
-| 10.0 Mb (100 requests) | Write     | 8.69 s  | 0.53 s      | 
-|                        | Read      | 1.19 s  | 0.57 s      |   
-| 1.0 Mb (1000 requests) | Write     | 12.66 s | 1.30 s      | 
-|                        | Read      | 2.04 s  | 1.38 s      |   
-| .1 Mb (10000 requests) | Write     | 61.86 s | 13.73 s     | 
-|                        | Read      | 9.39 s  | 15.02 s     |   
+| 10.0 Mb (100 requests) | Write     | 8.39 s  | 2.65 s      | 
+|                        | Read      | 2.13 s  | 1.4s        |   
+| 1.0 Mb (1000 requests) | Write     | 16.38 s | 3.78 s      | 
+|                        | Read      | 3.13 s  | 1.16 s      |   
+| .1 Mb (10000 requests) | Write     | 35.3 s  | 11.25 s     | 
+|                        | Read      | 14.51 s | 2.24 s      |   
