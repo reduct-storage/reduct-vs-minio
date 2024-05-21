@@ -7,7 +7,7 @@ from minio import Minio
 from reduct import Client as ReductClient
 
 BLOB_SIZE = 10_000_000
-BLOB_COUNT = 1_000_000_000 // BLOB_SIZE
+BLOB_COUNT = min(1000, 1_000_000_000 // BLOB_SIZE)
 BUCKET_NAME = "test"
 
 CHUNK = random.randbytes(BLOB_SIZE)
@@ -17,7 +17,6 @@ minio_client = Minio(
 )
 
 
-# reduct_client = ReductClient("http://127.0.0.1:8383")
 
 
 def write_to_minio():
@@ -70,17 +69,17 @@ if __name__ == "__main__":
     print(f"Chunk size={BLOB_SIZE / 1000_000} Mb, count={BLOB_COUNT}")
     ts = time.time()
     size = write_to_minio()
-    print(f"Write {size / 1000_000} Mb to Minio: {time.time() - ts} s")
+    print(f"Write {size / 1000_000} Mb to Minio: {BLOB_COUNT / (time.time() - ts)} blob/s")
 
     ts_read = time.time()
     size = read_from_minio(ts, time.time())
-    print(f"Read {size / 1000_000} Mb from Minio: {time.time() - ts_read} s")
+    print(f"Read {size / 1000_000} Mb from Minio: {BLOB_COUNT / (time.time() - ts_read)} blob/s")
 
     loop = asyncio.new_event_loop()
     ts = time.time()
     size = loop.run_until_complete(write_to_reduct())
-    print(f"Write {size / 1000_000} Mb to ReductStore: {time.time() - ts} s")
+    print(f"Write {size / 1000_000} Mb to ReductStore: {BLOB_COUNT / (time.time() - ts)} blob/s")
 
     ts_read = time.time()
     size = loop.run_until_complete(read_from_reduct(ts, time.time()))
-    print(f"Read {size / 1000_000} Mb from ReductStore: {time.time() - ts_read} s")
+    print(f"Read {size / 1000_000} Mb from ReductStore: {BLOB_COUNT / (time.time() - ts_read)} blob/s")
