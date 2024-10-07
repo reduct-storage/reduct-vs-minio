@@ -4,9 +4,13 @@ import time
 import asyncio
 
 from minio import Minio
-from reduct import Client as ReductClient
+from reduct import Client as ReductClient, Batch
 
-BLOB_SIZE = 10_000_000
+BLOB_SIZE = 1000_000
+
+BATCH_MAX_SIZE = 8_000_000
+BATCH_MAX_RECORDS = 80
+
 BLOB_COUNT = min(1000, 1_000_000_000 // BLOB_SIZE)
 BUCKET_NAME = "test"
 
@@ -47,12 +51,24 @@ def read_from_minio(t1, t2):
 
 
 async def write_to_reduct():
-    async with ReductClient("http://127.0.0.1:8383") as reduct_client:
+    async with ReductClient(
+        "http://127.0.0.1:8383", api_token="reductstore"
+    ) as reduct_client:
         count = 0
-        bucket = await reduct_client.create_bucket("test", exist_ok=True)
-        for i in range(1, BLOB_COUNT):
-            await bucket.write("data", CHUNK)
+        bucket = await reduct_client.get_bucket("test")
+        batch = Batch()
+        for i in range(0, BLOB_COUNT):
+            batch.add(timestamp=time.time(), data=CHUNK)
+            await asyncio.sleep(0.000001)  # To avoid time collisions
             count += BLOB_SIZE
+
+            if  batch.size >= BATCH_MAX_SIZE or len(batch) >= BATCH_MAX_RECORDS:
+                await bucket.write_batch("data", batch)
+                batch.clear()
+
+        if len(batch) > 0:
+            await bucket.write_batch("data", batch)
+
         return count
 
 
